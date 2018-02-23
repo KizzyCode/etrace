@@ -71,6 +71,14 @@ impl<T: std::fmt::Debug> Error<T> {
 		let description = format!("{:?}", kind);
 		Error::propagate_with_kind_desc(kind, description, sub_error, file, line)
 	}
+	
+	/// Creates a new error with the same kind and description as in the sub-error
+	///
+	/// _Note: This function is not intended for direct use; take a look at the `rethrow_err!()`-
+	/// macro instead_
+	pub fn propagate(sub_error: Error<T>, file: &'static str, line: u32) -> Self where T: Clone {
+		Error::propagate_with_kind_desc(sub_error.kind.clone(), sub_error.description.clone(), sub_error.into(), file, line)
+	}
 }
 impl<T: std::fmt::Debug> ToString for Error<T> {
 	/// Converts the error into a human-readable description ("pretty-print")
@@ -98,8 +106,8 @@ macro_rules! throw_err {
 /// Creates a new error with a sub-error and returns it (`return Err(created_error)`)
 ///
 /// Use `rethrow_err!(error_kind, error)` to create an error with an automatically created
-/// description or use `rethrow_err!(error_kind, description, error)` to provide an explicit
-/// description
+/// description or use
+/// `rethrow_err!(error_kind, description, error)` to provide an explicit description
 macro_rules! rethrow_err {
     ($kind:expr, $description:expr, $suberr:expr) =>
     	(return Err($crate::Error::propagate_with_kind_desc($kind, $description, $suberr.into(), file!(), line!())));
@@ -111,9 +119,10 @@ macro_rules! rethrow_err {
 /// Runs an expression and returns either the unwrapped result or creates a new error with the
 /// returned error as sub-error and returns the new error (`return Err(Error<T>)`)
 ///
-/// Use `try_rethrow_err!(expression, error_kind)` to create an error with an automatically created
-/// description or use `try_rethrow_err!(expression, error_kind, description)` to provide an
-/// explicit description
+/// Use `try_rethrow_err!(expression)` to adopt the underlying error-kind and description or use
+/// `try_rethrow_err!(expression, error_kind)` to create an error with an automatically created
+/// description or use
+/// `try_rethrow_err!(expression, error_kind, description)` to provide an explicit description
 macro_rules! try_rethrow_err {
 	($code:expr, $kind:expr, $description:expr) => (match $code {
 		Ok(result) => result,
@@ -122,6 +131,10 @@ macro_rules! try_rethrow_err {
 	($code:expr, $kind:expr) => (match $code {
 		Ok(result) => result,
 		Err(error) => return Err($crate::Error::propagate_with_kind($kind, error.into(), file!(), line!()))
+	});
+	($code:expr) => (match $code {
+		Ok(result) => result,
+		Err(error) => return Err($crate::Error::propagate(error, file!(), line!()))
 	});
 }
 
