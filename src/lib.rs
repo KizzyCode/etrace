@@ -8,7 +8,7 @@ pub struct WrappedError {
 	pub line: u32,
 	pub sub_error: Option<std::rc::Rc<WrappedError>>
 }
-impl<T: std::fmt::Debug> From<Error<T>> for WrappedError {
+impl<T: std::fmt::Debug + Send> From<Error<T>> for WrappedError {
 	fn from(error: Error<T>) -> Self {
 		WrappedError {
 			kind_repr: format!("{:?}", error.kind), description: error.description,
@@ -26,20 +26,21 @@ impl ToString for WrappedError {
 		string
 	}
 }
+unsafe impl Send for WrappedError {}
 
 
 
 #[derive(Debug)]
 /// A typed-error that contains the error-kind, description, the position (file, line) and an
 /// optional sub-error
-pub struct Error<T: std::fmt::Debug> {
+pub struct Error<T: std::fmt::Debug + Send> {
 	pub kind: T,
 	pub description: String,
 	pub file: &'static str,
 	pub line: u32,
 	pub sub_error: Option<std::rc::Rc<WrappedError>>
 }
-impl<T: std::fmt::Debug> Error<T> {
+impl<T: std::fmt::Debug + Send> Error<T> {
 	/// Creates a new error with an explicit description
 	///
 	/// _Note: This function is not intended for direct use; take a look at the `new_err!()`-macro
@@ -80,7 +81,7 @@ impl<T: std::fmt::Debug> Error<T> {
 		Error::propagate_with_kind_desc(sub_error.kind.clone(), sub_error.description.clone(), sub_error.into(), file, line)
 	}
 }
-impl<T: std::fmt::Debug> ToString for Error<T> {
+impl<T: std::fmt::Debug + Send> ToString for Error<T> {
 	/// Converts the error into a human-readable description ("pretty-print")
 	fn to_string(&self) -> String {
 		// Serialize error and sub-error (if any)
@@ -89,6 +90,7 @@ impl<T: std::fmt::Debug> ToString for Error<T> {
 		string
 	}
 }
+unsafe impl<T: std::fmt::Debug + Send> Send for Error<T> {}
 
 
 
