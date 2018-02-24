@@ -108,8 +108,8 @@ macro_rules! new_err {
 /// Use `throw_err!(error_kind)` to create an error with an automatically created description or use
 /// `throw_err!(error_kind, description)` to provide an explicit description
 macro_rules! throw_err {
-    ($kind:expr, $description:expr) => (return Err(new_err!($kind, $description, file!(), line!())));
-    ($kind:expr) => (return Err(new_err!($kind, file!(), line!())));
+    ($kind:expr, $description:expr) => (return Err($crate::Error::with_kind_desc($kind, $description, file!(), line!())));
+    ($kind:expr) => (return Err($crate::Error::with_kind($kind, file!(), line!())));
 }
 
 #[macro_export]
