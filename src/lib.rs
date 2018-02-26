@@ -21,7 +21,7 @@ impl ToString for WrappedError {
 	/// Converts the error into a human-readable description ("pretty-print")
 	fn to_string(&self) -> String {
 		// Serialize error and sub-error (if any)
-		let mut string = format!("{} {} (at {}:{})", self.kind_repr, self.description, self.file, self.line);
+		let mut string = format!("{}: {} (at {}:{})", self.kind_repr, self.description, self.file, self.line);
 		if let Some(ref sub_error) = self.sub_error { string += "\n  - "; string += &sub_error.to_string(); }
 		string
 	}
