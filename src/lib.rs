@@ -131,11 +131,11 @@ macro_rules! rethrow_err {
 /// Runs an expression and returns either the unwrapped result or creates a new error with the
 /// returned error as sub-error and returns the new error (`return Err(Error<T>)`)
 ///
-/// Use `try_rethrow_err!(expression)` to adopt the underlying error-kind and description or use
-/// `try_rethrow_err!(expression, error_kind)` to create an error with an automatically created
-/// description or use
-/// `try_rethrow_err!(expression, error_kind, description)` to provide an explicit description
-macro_rules! try_rethrow_err {
+/// Use `try_err!(expression)` to adopt the underlying error-kind and description or use
+/// `try_err!(expression, error_kind)` to create an error with an automatically created description
+/// or use
+/// `try_err!(expression, error_kind, description)` to provide an explicit description
+macro_rules! try_err {
 	($code:expr, $kind:expr, $description:expr) => (match $code {
 		Ok(result) => result,
 		Err(error) => return Err($crate::Error::propagate_with_kind_desc($kind, $description, error.into(), file!(), line!()))
@@ -154,8 +154,8 @@ macro_rules! try_rethrow_err {
 /// Runs an expression and returns either the unwrapped result or converts the error __into__ the
 /// matching `Error<T>` (using a `From`-trait) and returns it (`return Err(Error<T>)`)
 ///
-/// Use `try_wrap_err!(expression)` to create an error with an automatically created description or
-/// use `try_wrap_err!(expression, description)` to provide an explicit description
+/// Use `try_convert_err!(expression)` to create an error with an automatically created description or
+/// use `try_convert_err!(expression, description)` to provide an explicit description
 macro_rules! try_convert_err {
     ($code:expr, $description:expr) => (match $code {
 		Ok(result) => result,
