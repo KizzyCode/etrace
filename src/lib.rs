@@ -146,7 +146,7 @@ macro_rules! try_err {
 	});
 	($code:expr) => (match $code {
 		Ok(result) => result,
-		Err(error) => return Err($crate::Error::propagate(error, file!(), line!()))
+		Err(error) => return Err($crate::Error::propagate(error.into(), file!(), line!()))
 	});
 }
 
