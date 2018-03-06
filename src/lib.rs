@@ -118,7 +118,7 @@ macro_rules! new_err_with {
     ($kind:expr, $suberr:expr) =>
     	($crate::Error::propagate_with_kind($kind, $suberr.into(), file!(), line!()));
 	($suberr:expr) =>
-		($crate::Error::propagate(error.into(), file!(), line!()))
+		($crate::Error::propagate($suberr.into(), file!(), line!()))
 }
 
 #[macro_export]
