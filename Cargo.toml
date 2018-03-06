@@ -1,6 +1,6 @@
 [package]
 name = "etrace"
-version = "0.2.4"
+version = "0.2.5"
 authors = ["Keziah Biermann <development@kizzycode.de>"]
 
 [dependencies]

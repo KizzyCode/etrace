@@ -105,14 +105,31 @@ macro_rules! new_err {
 }
 
 #[macro_export]
+/// Creates a new error containing the underlaying error
+///
+/// Use `new_err_with(error)` to create an error with the same kind and an automatic description
+/// or use
+/// `new_err_with(kind, error)` to provide a new error-kind or use
+/// `new_err_with(kind, description, error)` to provide a new error-kind with an explicit
+/// description
+macro_rules! new_err_with {
+    ($kind:expr, $description:expr, $suberr:expr) =>
+    	($crate::Error::propagate_with_kind_desc($kind, $description, $suberr.into(), file!(), line!()));
+    ($kind:expr, $suberr:expr) =>
+    	($crate::Error::propagate_with_kind($kind, $suberr.into(), file!(), line!()));
+	($suberr:expr) =>
+		($crate::Error::propagate(error.into(), file!(), line!()))
+}
+
+#[macro_export]
 /// Creates a new error by converting `kind` __into__ the matching `Error<T>` (using a `From`-trait)
 /// and returns it (`return Err(Error<T>)`)
 ///
 /// Use `new_err_from!(kind)` to create an error with an automatically created description or use
 /// `new_err_from!(kind, description)` to provide an explicit description
 macro_rules! new_err_from {
-    ($kind:expr, $description:expr) => ($crate::Error::with_kind_desc($kind.into(), $description, file!(), line!()));
-    ($kind:expr) => ($crate::Error::with_kind($kind.into(), file!(), line!()));
+    ($kind:expr, $description:expr) => (new_err!($kind.into(), $description));
+    ($kind:expr) => (new_err!($kind.into()));
 }
 
 #[macro_export]
@@ -121,21 +138,21 @@ macro_rules! new_err_from {
 /// Use `throw_err!(kind)` to create an error with an automatically created description or use
 /// `throw_err!(kind, description)` to provide an explicit description
 macro_rules! throw_err {
-    ($kind:expr, $description:expr) => (return Err($crate::Error::with_kind_desc($kind, $description, file!(), line!())));
-    ($kind:expr) => (return Err($crate::Error::with_kind($kind, file!(), line!())));
+    ($kind:expr, $description:expr) => (return Err(new_err!($kind, $description)));
+    ($kind:expr) => (return Err(new_err!($kind)));
 }
 
 #[macro_export]
 /// Creates a new error with a sub-error and returns it (`return Err(created_error)`)
 ///
-/// Use `rethrow_err!(kind, error)` to create an error with an automatically created
-/// description or use
-/// `rethrow_err!(kind, description, error)` to provide an explicit description
+/// Use `rethrow_err!(error)` to create an error with the same kind or use
+/// `rethrow_err!(kind, error)` to provide a new error-kind or use
+/// `rethrow_err!(kind, description, error)` to provide a new error-kind with an explicit
+/// description
 macro_rules! rethrow_err {
-    ($kind:expr, $description:expr, $suberr:expr) =>
-    	(return Err($crate::Error::propagate_with_kind_desc($kind, $description, $suberr.into(), file!(), line!())));
-    ($kind:expr, $suberr:expr) =>
-    	(return Err($crate::Error::propagate_with_kind($kind, $suberr.into(), file!(), line!())));
+    ($kind:expr, $description:expr, $suberr:expr) => (return Err(new_err_with($kind, $description, $suberr)));
+    ($kind:expr, $suberr:expr) => (return Err(new_err_with($kind, $suberr)));
+	($suberr:expr) => (return Err(new_err_with($suberr)));
 }
 
 #[macro_export]
@@ -149,15 +166,15 @@ macro_rules! rethrow_err {
 macro_rules! try_err {
 	($code:expr, $kind:expr, $description:expr) => (match $code {
 		Ok(result) => result,
-		Err(error) => return Err($crate::Error::propagate_with_kind_desc($kind, $description, error.into(), file!(), line!()))
+		Err(error) => rethrow_err!($kind, $description, error)
 	});
 	($code:expr, $kind:expr) => (match $code {
 		Ok(result) => result,
-		Err(error) => return Err($crate::Error::propagate_with_kind($kind, error.into(), file!(), line!()))
+		Err(error) => rethrow_err!($kind, error)
 	});
 	($code:expr) => (match $code {
 		Ok(result) => result,
-		Err(error) => return Err($crate::Error::propagate(error.into(), file!(), line!()))
+		Err(error) => rethrow_err!(error)
 	});
 }
 
