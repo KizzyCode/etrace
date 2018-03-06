@@ -97,18 +97,29 @@ unsafe impl<T: std::fmt::Debug + Send> Send for Error<T> {}
 #[macro_export]
 /// Creates a new error
 ///
-/// Use `new_err!(error_kind)` to create an error with an automatically created description or use
-/// `new_err!(error_kind, description)` to provide an explicit description
+/// Use `new_err!(kind)` to create an error with an automatically created description or use
+/// `new_err!(kind, description)` to provide an explicit description
 macro_rules! new_err {
     ($kind:expr, $description:expr) => ($crate::Error::with_kind_desc($kind, $description, file!(), line!()));
     ($kind:expr) => ($crate::Error::with_kind($kind, file!(), line!()));
 }
 
 #[macro_export]
+/// Creates a new error by converting `kind` __into__ the matching `Error<T>` (using a `From`-trait)
+/// and returns it (`return Err(Error<T>)`)
+///
+/// Use `new_err_from!(kind)` to create an error with an automatically created description or use
+/// `new_err_from!(kind, description)` to provide an explicit description
+macro_rules! new_err_from {
+    ($kind:expr, $description:expr) => ($crate::Error::with_kind_desc($kind.into(), $description, file!(), line!()));
+    ($kind:expr) => ($crate::Error::with_kind($kind.into(), file!(), line!()));
+}
+
+#[macro_export]
 /// Creates a new error and returns it (`return Err(created_error)`)
 ///
-/// Use `throw_err!(error_kind)` to create an error with an automatically created description or use
-/// `throw_err!(error_kind, description)` to provide an explicit description
+/// Use `throw_err!(kind)` to create an error with an automatically created description or use
+/// `throw_err!(kind, description)` to provide an explicit description
 macro_rules! throw_err {
     ($kind:expr, $description:expr) => (return Err($crate::Error::with_kind_desc($kind, $description, file!(), line!())));
     ($kind:expr) => (return Err($crate::Error::with_kind($kind, file!(), line!())));
@@ -117,9 +128,9 @@ macro_rules! throw_err {
 #[macro_export]
 /// Creates a new error with a sub-error and returns it (`return Err(created_error)`)
 ///
-/// Use `rethrow_err!(error_kind, error)` to create an error with an automatically created
+/// Use `rethrow_err!(kind, error)` to create an error with an automatically created
 /// description or use
-/// `rethrow_err!(error_kind, description, error)` to provide an explicit description
+/// `rethrow_err!(kind, description, error)` to provide an explicit description
 macro_rules! rethrow_err {
     ($kind:expr, $description:expr, $suberr:expr) =>
     	(return Err($crate::Error::propagate_with_kind_desc($kind, $description, $suberr.into(), file!(), line!())));
@@ -132,9 +143,9 @@ macro_rules! rethrow_err {
 /// returned error as sub-error and returns the new error (`return Err(Error<T>)`)
 ///
 /// Use `try_err!(expression)` to adopt the underlying error-kind and description or use
-/// `try_err!(expression, error_kind)` to create an error with an automatically created description
+/// `try_err!(expression, kind)` to create an error with an automatically created description
 /// or use
-/// `try_err!(expression, error_kind, description)` to provide an explicit description
+/// `try_err!(expression, kind, description)` to provide an explicit description
 macro_rules! try_err {
 	($code:expr, $kind:expr, $description:expr) => (match $code {
 		Ok(result) => result,
@@ -154,9 +165,9 @@ macro_rules! try_err {
 /// Runs an expression and returns either the unwrapped result or converts the error __into__ the
 /// matching `Error<T>` (using a `From`-trait) and returns it (`return Err(Error<T>)`)
 ///
-/// Use `try_convert_err!(expression)` to create an error with an automatically created description or
-/// use `try_convert_err!(expression, description)` to provide an explicit description
-macro_rules! try_convert_err {
+/// Use `try_err_from!(expression)` to create an error with an automatically created description or
+/// use `try_err_from!(expression, description)` to provide an explicit description
+macro_rules! try_err_from {
     ($code:expr, $description:expr) => (match $code {
 		Ok(result) => result,
 		Err(error) => throw_err!(error.into(), $description)
