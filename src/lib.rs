@@ -150,7 +150,7 @@ macro_rules! throw_err {
 /// `rethrow_err!(kind, description, error)` to provide a new error-kind with an explicit
 /// description
 macro_rules! rethrow_err {
-    ($kind:expr, $description:expr, $suberr:expr) => (return Err(new_err_with($kind, $description, $suberr)));
+    ($kind:expr, $description:expr, $suberr:expr) => (return Err(new_err_with!($kind, $description, $suberr)));
     ($kind:expr, $suberr:expr) => (return Err(new_err_with!($kind, $suberr)));
 	($suberr:expr) => (return Err(new_err_with!($suberr)));
 }
