@@ -194,3 +194,22 @@ macro_rules! try_err_from {
 		Err(error) => throw_err!(error.into())
 	});
 }
+
+#[macro_export]
+/// Runs an expression and returns either the unwrapped result or executes `$or` with the error as
+/// parameter and throws the result
+macro_rules! ok_or {
+    ($code:expr, $or:expr) => (match $code {
+    	Ok(result) => result,
+    	Err(error) => throw_err!($or(error))
+    });
+}
+
+#[macro_export]
+/// Runs an expression and returns either the unwrapped result or throws `$or`
+macro_rules! some_or {
+    ($code:expr, $or:expr) => (match $code {
+    	Ok(result) => result,
+    	Err(_) => throw_err!($or)
+    });
+}
