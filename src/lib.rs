@@ -29,7 +29,6 @@ impl ToString for WrappedError {
 unsafe impl Send for WrappedError {}
 
 
-
 #[derive(Debug)]
 /// A typed-error that contains the error-kind, description, the position (file, line) and an
 /// optional sub-error
@@ -91,7 +90,6 @@ impl<T: std::fmt::Debug + Send> ToString for Error<T> {
 	}
 }
 unsafe impl<T: std::fmt::Debug + Send> Send for Error<T> {}
-
 
 
 #[macro_export]
@@ -196,28 +194,34 @@ macro_rules! try_err_from {
 }
 
 #[macro_export]
-/// Runs an expression and returns either the unwrapped result or executes `$or` with the error as
-/// parameter and throws the result
+/// Runs `$code` and returns either the unwrapped result or binds the error to `$err` and executes
+/// `$or` (or can then access the error using the identifier passed as `$err`)
+///
+/// Example:
+/// ```
+/// // This code either prints the error and exits (if error) or prints the result (if ok)
+/// let unwrapped = ok_or!(result, example_error_identifier, {
+/// 	eprintln!("Fatal error: \"{}\"", example_error_identifier);
+/// 	std::process::exit(1);
+/// });
+/// println!("Result: \"{}\"", unwrapped);
+/// ```
 macro_rules! ok_or {
-	($code:expr, $or:expr, $description:expr) => (match $code {
-    	Ok(result) => result,
-    	Err(error) => throw_err!($or(error), $description)
-    });
-    ($code:expr, $or:expr) => (match $code {
-    	Ok(result) => result,
-    	Err(error) => throw_err!($or(error))
-    });
+	($code:expr, $err:ident, $or:expr) => (match $code {
+		Ok(result) => result,
+		Err($err) => $or
+	});
+	($code:expr, $or:expr) => (match $code {
+		Ok(result) => result,
+		Err(_) => $or
+	});
 }
 
 #[macro_export]
-/// Runs an expression and returns either the unwrapped result or throws `$or`
+/// Runs an expression and returns either the unwrapped result or executes `$or`
 macro_rules! some_or {
-	($code:expr, $or:expr, $description:expr) => (match $code {
-    	Ok(result) => result,
-    	Err(_) => throw_err!($or, $description)
-    });
-    ($code:expr, $or:expr) => (match $code {
-    	Ok(result) => result,
-    	Err(_) => throw_err!($or)
-    });
+	($code:expr, $or:expr) => (match $code {
+		Some(result) => result,
+		None => $or
+	});
 }
