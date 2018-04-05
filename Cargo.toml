@@ -3,7 +3,7 @@ name = "etrace"
 version = "0.2.7"
 authors = ["KizzyCode Software Labs./Keziah Biermann <development@kizzycode.de>"]
 description = "This library provides some structs and macros to create stackable/traceable errors for your own custom errors"
-license = "BSD 2-Clause OR MIT"
+license = "BSD-2-Clause OR MIT"
 repository = "https://github.com/KizzyCode/etrace"
 readme = "README.md"
 
