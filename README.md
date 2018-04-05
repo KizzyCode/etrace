@@ -1,4 +1,5 @@
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-blue.svg)](https://opensource.org/licenses/BSD-2-Clause)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 # About
 This library provides some structs and macros to create stackable/traceable errors for your own custom error-kinds.
