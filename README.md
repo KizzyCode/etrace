@@ -4,12 +4,13 @@
 # About
 This library provides some structs and macros to create stackable/traceable errors for your own custom error-kinds.
 
-We provide some macros to create and "throw" an error with a custom kind `T` and optionally a custom description and/or
-a previous `Error<T>` (even for different types of `T`).
+We provide some macros to create and "throw/rethrow" an error with a custom kind `T` and optionally a custom description
+and/or a previous `Error<T>` (even for different types of `T`).
 
-Additionally we provide two macros to `try!` an expression and either __convert__ the resulting error into your
-`Error<T>` or to __include__ the resulting error as sub-error into a new `Error<T>` 
- 
+Additionally we provide macros to evaluate an expression (`try_err!`, `try_err_from!`, `ok_or!`, `some_or!`, ...) to
+either __convert__ the resulting error into your `Error<T>` or to __include__ the resulting error as sub-error into a
+new `Error<T>`. 
+
 # Build Library and Documentation
 To build and open the documentation, go into the projects root-directory and run `cargo doc --open`.
 
