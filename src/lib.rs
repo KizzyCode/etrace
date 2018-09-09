@@ -17,13 +17,19 @@ impl<T: std::fmt::Debug + Send> From<Error<T>> for WrappedError {
 		}
 	}
 }
-impl ToString for WrappedError {
-	/// Converts the error into a human-readable description ("pretty-print")
-	fn to_string(&self) -> String {
-		// Serialize error and sub-error (if any)
-		let mut string = format!("{}: {} (at {}:{})", self.kind_repr, self.description, self.file, self.line);
-		if let Some(ref sub_error) = self.sub_error { string += "\n  - "; string += &sub_error.to_string(); }
-		string
+impl std::fmt::Display for WrappedError {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		write!(f, "{}: {} (at {}:{})", self.kind_repr, self.description, self.file, self.line)?;
+		if let Some(ref sub_error) = self.sub_error { write!(f, "\n  - {}", sub_error.to_string())?; }
+		Ok(())
+	}
+}
+impl std::error::Error for WrappedError {
+	fn cause(&self) -> Option<&std::error::Error> {
+		self.sub_error.as_ref().and_then(|e| {
+			let sub_error: &std::error::Error = e.as_ref();
+			Some(sub_error)
+		})
 	}
 }
 unsafe impl Send for WrappedError {}
@@ -80,15 +86,14 @@ impl<T: std::fmt::Debug + Send> Error<T> {
 		Error::propagate_with_kind_desc(sub_error.kind.clone(), sub_error.description.clone(), sub_error.into(), file, line)
 	}
 }
-impl<T: std::fmt::Debug + Send> ToString for Error<T> {
-	/// Converts the error into a human-readable description ("pretty-print")
-	fn to_string(&self) -> String {
-		// Serialize error and sub-error (if any)
-		let mut string = format!("{:?}: {} (at {}:{})", self.kind, self.description, self.file, self.line);
-		if let Some(ref sub_error) = self.sub_error { string += "\n  - "; string += &sub_error.to_string(); }
-		string
+impl<T: std::fmt::Debug + Send> std::fmt::Display for Error<T> {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		write!(f, "{:?}: {} (at {}:{})", self.kind, self.description, self.file, self.line)?;
+		if let Some(ref sub_error) = self.sub_error { write!(f, "\n  - {}", sub_error.to_string())?; }
+		Ok(())
 	}
 }
+impl<T: std::fmt::Debug + Send> std::error::Error for Error<T> {}
 unsafe impl<T: std::fmt::Debug + Send> Send for Error<T> {}
 
 
