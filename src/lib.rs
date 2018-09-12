@@ -31,6 +31,8 @@ impl std::error::Error for WrappedError {
 			Some(sub_error)
 		})
 	}
+
+	fn description(&self) -> &str { self.description.as_str() }
 }
 unsafe impl Send for WrappedError {}
 
@@ -93,7 +95,9 @@ impl<T: std::fmt::Debug + Send> std::fmt::Display for Error<T> {
 		Ok(())
 	}
 }
-impl<T: std::fmt::Debug + Send> std::error::Error for Error<T> {}
+impl<T: std::fmt::Debug + Send> std::error::Error for Error<T> {
+	fn description(&self) -> &str { self.description.as_str() }
+}
 unsafe impl<T: std::fmt::Debug + Send> Send for Error<T> {}
 
 
