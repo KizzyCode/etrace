@@ -25,14 +25,14 @@ impl std::fmt::Display for WrappedError {
 	}
 }
 impl std::error::Error for WrappedError {
+	fn description(&self) -> &str { self.description.as_str() }
+	
 	fn cause(&self) -> Option<&std::error::Error> {
 		self.sub_error.as_ref().and_then(|e| {
 			let sub_error: &std::error::Error = e.as_ref();
 			Some(sub_error)
 		})
 	}
-
-	fn description(&self) -> &str { self.description.as_str() }
 }
 unsafe impl Send for WrappedError {}
 
